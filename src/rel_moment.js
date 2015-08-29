@@ -73,5 +73,41 @@ class MemoryMoment {
         return this.toMoment().toDate();
     }
 
+    _checkBase(val,opts) {
+        //Helper function for find base.
+        for (var i=0 ; i< opts.length; ++i ) {
+            var possible  = opts[i];
+            if (possible == val) {
+                return { value:possible, index:i};
+            }
+            return null;
+        }
+    }
+
+    /**
+    * Identify if the base object this is closest bound to from the 
+    * list provided.
+    * returns and object or null if not found.
+    *
+    * The object has the following format
+    *    ops: A list of operation adjust the base to this value.
+    *    value: the found base value,
+    *    index: this index of the base value in the provided options
+    */
+    findBase(opts) {
+        var ops = [];
+        ops = ops.concat(this._ops);
+        var cur = this.base;
+        while (cur) {
+            var tst = this._checkBase(cur,opts);
+            if (tst)  {
+                return  { ops:ops, index:tst.index,value:tst.value };
+            }
+            ops = ops.concat(cur._ops);
+            cur = cur.base;
+        }
+        return null; //Not found
+    }
+
 
 }
