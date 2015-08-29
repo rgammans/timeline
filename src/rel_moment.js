@@ -41,7 +41,6 @@ class MemoryMoment {
             rv = moment(rv);
         }
         for (var op of this._ops) {
-            console.log('baz');
 
             if (op.op == "add") {
                 rv.add(op.amt,op.units);
