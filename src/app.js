@@ -82,7 +82,7 @@ class TimelineRelations {
                     remove: true       // delete an item by tapping the delete button top right
                },
 
-                onMove: function (item,callback) { that.onMove(item,callback);}
+                onMoving: function (item,callback) { that.onMove(item,callback);}
             });
         }
 }
