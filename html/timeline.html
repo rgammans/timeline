@@ -18,8 +18,21 @@
 <script type='text/javascript'>
 window.onload=function(){
 var container = document.getElementById('vis');
+
 events = [];
+date_relations = []
 function create_event(name,when,ended) {
+    
+    if (console.assert) {
+        console.assert(events.length == date_relations.length, "Internal data inconsistent");
+    }
+    var loc =  events.length ;
+    
+    //Store the provided dates as is so they mantain any relationships.
+    date_relations[loc] = { start:when, end: ended }
+
+
+    //Convert to JS Dates for vis.
     var tend = typeof(ended);
     var edit = true;
     if ((tend != "undefined") && (tend != "Date")) {
@@ -30,10 +43,11 @@ function create_event(name,when,ended) {
     }
 
     //Id is our array index which makes the call backs easy
-    var loc =  events.length ;
     events[loc] = {id:loc, content:name,start:when.toDate(),end:ended, editable:edit};
     return when;
 }
+
+
 
 //*************************************************************************************************************************
 // Make your edits here between these two rows of stars
@@ -46,11 +60,19 @@ today              =    create_event("England declares WAR!",               mome
 //****************************************************************************************************************************
 x = new vis.DataSet(events);
 var timeline=new vis.Timeline(container,x,{
-editable: {
-    add: true,         // add new items by double tapping
-    updateTime: true,  // drag items horizontally
-    remove: true       // delete an item by tapping the delete button top right
-  }
+    editable: {
+            add: true,         // add new items by double tapping
+            updateTime: true,  // drag items horizontally
+            remove: true       // delete an item by tapping the delete button top right
+          },
+
+    onMove: function (item, callback) {
+        //Check Item is of the correct form.
+        date_relations[item.id].start.set(item.start.toObject());
+        //update vis timeline
+        callback(item);
+    }
+
             });
 document.getElementById('warn').style.display = "none";
 }
