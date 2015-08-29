@@ -22,7 +22,7 @@ class MemoryMoment {
     subtract(amt,units) {
         //Buid a new values based on tjis
         var rv = new MemoryMoment(this);
-        rv._append_op({'op':'subract','amt':amt,'units':units});
+        rv._append_op({'op':'subtract','amt':amt,'units':units});
         return rv;
     }
     add(amt,units) {
@@ -33,20 +33,28 @@ class MemoryMoment {
     }
 
     toMoment() {
-        var rv = this.initVal;
+        var rv = this.base;
         if (rv instanceof MemoryMoment) {
             rv = rv.toMoment();
+        } else {
+            //Ensure we hae a unique instance
+            rv = moment(rv);
         }
         for (var op of this._ops) {
+            console.log('baz');
 
             if (op.op == "add") {
-                rv.add(op.amt,op.units)
-            }else if (op.op == "subtract") {
-                rv.subtract(op.amt,op.units)
-            }
+                rv.add(op.amt,op.units);
+            }else {
+             if (op.op == "subtract") {
+                rv.subtract(op.amt,op.units);
+            }}
         }
 
         return rv
+    }
+    toDate() {
+        return this.toMoment().toDate();
     }
 
 

@@ -4,8 +4,10 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <title> Example Timeline</title>
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.css">
-      <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.js"></script>
+      <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.js"></script>
       <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+      <script type='text/javascript' src="../lib/rel_moment.js"></script>
+      <script type='text/javascript' src="../lib/browser-polyfill.js"></script>
   <style type='text/css'>
   </style>
 </head>
@@ -18,22 +20,27 @@ window.onload=function(){
 var container = document.getElementById('vis');
 events = [];
 function create_event(name,when,ended) {
-    events.push({content:name,start:when,end:ended});
+    var tend = typeof(ended);
+    if ((tend != "undefined") && (tend != "Date")) {
+        ended  = ended.toDate();
+    }
+
+    events.push({content:name,start:when.toDate(),end:ended});
     return when;
 }
 
 //*************************************************************************************************************************
 // Make your edits here between these two rows of stars
 
-game_start =            create_event("Game Start",                          moment("2015-12-21"));
-s_happen =              create_event("Something Happend",                   moment(game_start).subtract(2,'months'));
-other =                 create_event("Another thing happens",               moment(s_happen).add(1,'day')); 
+game_start =            create_event("Game Start",                          new MemoryMoment(moment("2015-12-21")));
+s_happen =              create_event("Something Happend",                   game_start.subtract(2,'months'));
+other =                 create_event("Another thing happens",               s_happen.add(1,'day')); 
 today              =    create_event("England declares WAR!",               moment());
 
 //****************************************************************************************************************************
 x = new vis.DataSet(events);
 var timeline=new vis.Timeline(container,x,{});
-document.getElementById('warn').style.display = "none";memorial
+document.getElementById('warn').style.display = "none";
 }
 </script>
 
