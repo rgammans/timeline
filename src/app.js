@@ -4,8 +4,8 @@ class TimelineRelations {
     constructor() {
 
        this.events = [];
-       this.date_relations = []
-
+       this.date_relations = [];
+       this.timeline = null;
     }
 
      create_event(name,when,ended) {
@@ -17,7 +17,13 @@ class TimelineRelations {
 
         //Store the provided dates as is so they mantain any relationships.
         this.date_relations[loc] = { start:when, end: ended }
+        var dates = this.dateProcessor(when,ended);
+       //Id is our array index which makes the call backs easy
+        this.events[loc] = {id:loc, content:name,start:dates.start,end:dates.end, editable:dates.editable};
+        return when;
+    }
 
+    dateProcessor(when,ended) {
 
         //Convert to JS Dates for vis.
         var tend = typeof(ended);
@@ -29,9 +35,7 @@ class TimelineRelations {
             edit = false;
         }
 
-        //Id is our array index which makes the call backs easy
-        this.events[loc] = {id:loc, content:name,start:when.toDate(),end:ended, editable:edit};
-        return when;
+        return { start:when.toDate(),end:ended, editable:edit};
     }
 
     onMove (item, callback) {
@@ -39,12 +43,27 @@ class TimelineRelations {
         this.date_relations[item.id].start.set(item.start.toObject());
         //update vis timeline
         callback(item);
+        this.updateTimeline()
+    }
+
+    updateTimeline() {
+
+        if (this.timeline) {
+            for(var i = 0; i < this.events.length; i++) {
+                var date = this.dateProcessor(this.date_relations[i].start,this.date_relations[i].end);
+                this.events[i].start = date.start;
+                this.events[i].end = date.end;
+                this.dataset.update(this.events[i]);
+
+            }
+        }
+
     }
 
     run(container) {
         var that = this;
-        var x = new vis.DataSet(this.events);
-        var timeline=new vis.Timeline(container,x,{
+        this.dataset = new vis.DataSet(this.events);
+        this.timeline=new vis.Timeline(container,this.dataset,{
                 editable: {
                     add: true,         // add new items by double tapping
                     updateTime: true,  // drag items horizontally
