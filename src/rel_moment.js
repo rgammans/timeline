@@ -11,20 +11,37 @@ class MemoryMoment {
         this._ops.push(op);
     }
 
+    /**
+    * Move the current instance backwards in time the specified amount frm it's current
+    *   value.
+    */
     move_back(amt,units) {
         this._append_op({'op':'subtract','amt':amt,'units':units});
     }
 
+    /**
+    * Move the current instance forward in time the specified amount frm it's current
+    *   value.
+    */
     move_forward(amt,units) {
         this._append_op({'op':'add','amt':amt,'units':units});
     }
-
+    
+    /**
+    * Create a new instance using this as a base, with a value the specifed amount of
+    * before this instances' value. And bound to this instance as a base
+    */
     subtract(amt,units) {
         //Buid a new values based on tjis
         var rv = new MemoryMoment(this);
         rv._append_op({'op':'subtract','amt':amt,'units':units});
         return rv;
     }
+ 
+    /**
+    * Create a new instance using this as a base, with a value the specifed amount of
+    * after this instances' value. And bound to this instance as a base
+    */
     add(amt,units) {
         //Buid a new values based on tjis
         var rv = new MemoryMoment(this);
@@ -52,7 +69,7 @@ class MemoryMoment {
 
         return rv
     }
-    toDate() {
+     toDate() {
         return this.toMoment().toDate();
     }
 
