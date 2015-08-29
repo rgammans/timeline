@@ -38,13 +38,24 @@ class TimelineRelations {
         return { start:when.toDate(),end:ended, editable:edit};
     }
 
+    //This handle the face we get different Date types back from Vis.
+    _update_start (start,new_value) {
+        if (moment.isMoment(new_value)) {
+            start.set(new_value.toObject());
+        } else {
+            start.set(moment(new_value).toObject());
+        }
+    }
+
     onMove (item, callback) {
         //Check Item is of the correct form.
-        this.date_relations[item.id].start.set(item.start.toObject());
+        this._update_start(this.date_relations[item.id].start,item.start);
         //update vis timeline
         callback(item);
         this.updateTimeline()
     }
+
+
 
     updateTimeline() {
 
@@ -64,6 +75,7 @@ class TimelineRelations {
         var that = this;
         this.dataset = new vis.DataSet(this.events);
         this.timeline=new vis.Timeline(container,this.dataset,{
+                snap: null,
                 editable: {
                     add: true,         // add new items by double tapping
                     updateTime: true,  // drag items horizontally
