@@ -1,6 +1,6 @@
 SRC = $(wildcard src/*.js)
 LIB = $(SRC:src/%.js=lib/%.js)
-LIB += lib/browser-polyfill.js s lib/jquery.js
+LIB += lib/browser-polyfill.js lib/jquery.jss
 
 lib: $(LIB)
 
