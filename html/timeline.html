@@ -3,12 +3,19 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <title> Example Timeline</title>
+    <!-- CSS -->
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.css">
+      <link rel="stylesheet" type="text/css" href="../css/ui/jquery-ui.min.css" />   
+      <link rel="stylesheet" type="text/css" href="../css/ui/datepicker.css" />   
+       <!-- JS  from CDNs-->
       <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.js"></script>
       <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
 
     <!-- Our JS from bowe -->
       <script type='text/javascript' src="../lib/jquery.js"></script>
+      <script type='text/javascript' src="../lib/jquery-ui.min.js"></script>
+      <script type='text/javascript' src="../lib/ui/datepicker.js"></script>
+    <!-- Our JS (+ Pollyfills )-->
       <script type='text/javascript' src="../lib/rel_moment.js"></script>
       <script type='text/javascript' src="../lib/app.js"></script>
       <script type='text/javascript' src="../lib/browser-polyfill.js"></script>
@@ -16,10 +23,97 @@
   </style>
 </head>
 <body>
+<h2>Example Timeline</h2>
+    <span id="warn">Please note you will need internet access for this to work. Either you don't have it or an error occured</span>
+   <p>
+
+    <div id="vis"></div>
+
+    <div id="edit-form">
+        <form>
+        <div class="absolute_form">
+            <div class="inner-wrapper">
+                <input class="input idfield" name="id" type="hidden">
+                <input class="input textfield" name="label" type="text">
+                <input class="input startfield" name="start" type="text">
+                <input class="input startfield_alt" name="start_alt" type="hidden">
+                <input class="input endfield" name="end" type="text">
+                <input class="input endfield_alt" name="end_alt" type="hidden">
+                <button onclick="app.update_entry()" type="button">Update</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+$(function() {
+
+    //** Define View handlers **/
+    $('.absolute_form .startfield').datepicker( {
+        altFormat:"yy-mm-dd",
+        dateFormat:"dd/mm/yy",
+        altField:$('.absolute_form .startfield_alt')
+    });
+    $('.absolute_form .endfield').datepicker( {
+        altFormat:"yy-mm-dd",
+        dateFormat:"dd/mm/yy",
+        altField:$('.absolute_form .endfield_alt')
+    });
+
+    function _update_datepicker(picker, newd) {
+        picker.datepicker('setDate',newd);
+    }
+
+    form_methods = {
+        set_startDate : function (d) {
+            _update_datepicker($('.absolute_form .startfield'),d);
+        },
+        set_endDate : function (d) {
+            _update_datepicker($('.absolute_form .endfield'),d);
+        },
+        set_text : function (d) {
+            $('.absolute_form .textfield').prop('value',d);
+        },
+        set_id : function (d) {
+            $('.absolute_form .idfield').prop('value',d);
+        },
+        get_startDate : function (d) {
+            return $('.absolute_form .startfield_alt').prop('value');
+        },
+        get_endDate : function (d) {
+            return $('.absolute_form .endfield_alt').prop('value');
+        },
+        get_text : function (d) {
+            return $('.absolute_form .textfield').prop('value');
+        },
+        get_id : function (d) {
+            return $('.absolute_form .idfield').prop('value');
+        },
+        disable_text : function (d) {
+            $('.absolute_form .textfield').prop('diabled',d);
+        },
+        disable_id : function (d) {
+            $('.absolute_form .idfield').prop('disabled',d);
+        },
+        disable_startDate : function (d) {
+            $('.absolute_form .startfield').prop('disabled',d);
+        },
+        disable_endDate : function (d) {
+            return $('.absolute_form .endfield').prop('disabled',d);
+        },
+
+
+    }
+
+});
+</script>
 <script type='text/javascript'>
-window.onload=function(){
+$(function(){
+    /**
+    *  Initialise the dataset and launch the main app controller 
+    */
     var container = document.getElementById('vis');
-    var app = new TimelineRelations();
+     app = new TimelineRelations();
 
 //*************************************************************************************************************************
 // Make your edits here between these two rows of stars
@@ -31,31 +125,11 @@ today              =    app.create_event("England declares WAR!",               
 
 //****************************************************************************************************************************
 
-    app.run(container);
+    app.run(container,form_methods);
     document.getElementById('warn').style.display = "none";
-}
+});
 </script>
 
-<h2>Example Timeline</h2>
-    <span id="warn">Please note you will need internet access for this to work. Either you don't have it or an error occured</span>
-   <p>
-
-    <div id="vis"></div>
-
-    <div id="edit-form">
-        <form>
-        <div class="absolute_form">
-            <div class="inner-wrapper">
-                <input class="input idfield" name="label" type="hidden">
-                <input class="input textfield" name="label" type="text">
-                <input class="input startfield" name="label" type="text">
-                <input class="input endfield" name="label" type="text">
-                <button onclick="app.update_entry()" type="button">Update</button>
-            </div>
-        </div>
-    </div>
-
-</body>
 
 </html>
 
