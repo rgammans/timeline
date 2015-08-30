@@ -69,10 +69,12 @@ class TimelineRelations {
 
         if (this.timeline) {
             for(var i = 0; i < this.events.length; i++) {
-                var date = this.dateProcessor(this.date_relations[i].start,this.date_relations[i].end);
-                this.events[i].start = date.start;
-                this.events[i].end = date.end;
-                this.dataset.update(this.events[i]);
+                if (! this.events[i].deleted) {
+                    var date = this.dateProcessor(this.date_relations[i].start,this.date_relations[i].end);
+                    this.events[i].start = date.start;
+                    this.events[i].end = date.end;
+                    this.dataset.update(this.events[i]);
+                }
 
             }
         }
@@ -123,6 +125,19 @@ class TimelineRelations {
                 onAdd: function (item, callback) {
                     that.create_event(item.content,moment(item.start));
                     item.id = that.events.length -1;
+                    callback(item);
+                },
+                onRemove: function (item, callback) {
+                    var loc = item.id;
+                    //Set a flag rather than deleting the item so it's position 
+                    // in the array can't be reused
+                    that.events[loc].deleted = true;
+                    if (form_methods.get_id() == loc) {
+                        form_methods.set_id('')
+                        form_methods.set_startDate('')
+                        form_methods.set_endDate('')
+                        form_methods.set_text('')
+                    }
                     callback(item);
                 }
 
