@@ -8,10 +8,9 @@ class SimpleFileReader {
         this.container = container
         $(container).html('<input type="file" id="' + id +'" name="file" > <div id="xx" style="background:grey;" class="content"> ');
         var x=$("#"+id,container);
-        $("#"+id,container).on('change',function() { alert('xa'); that.onchanged.apply(that,arguments) } );
+        $("#"+id,container).on('change',function() { that.onchanged.apply(that,arguments) } );
     }
     onchanged(e) {
-        alert('c');
         var that = this;
         this.f = e.target.files[0];
         this.reader = new FileReader();
