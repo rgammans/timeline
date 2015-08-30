@@ -18,6 +18,7 @@
     <!-- Our JS (+ Pollyfills )-->
       <script type='text/javascript' src="../lib/rel_moment.js"></script>
       <script type='text/javascript' src="../lib/app.js"></script>
+      <script type='text/javascript' src="../lib/simpleFile.js"></script>
       <script type='text/javascript' src="../lib/browser-polyfill.js"></script>
   <style type='text/css'>
   </style>
@@ -44,9 +45,25 @@
         </div>
     </div>
 
+    <div class="save_load_panel">
+    <button onclick="download(app.serialize(),'timeline.jsn','text/json')" type="button">Save Data</button>
+    <br>
+    <div id="filebox" ></div>
+    </div>
 </body>
 <script>
+
+/** Helper function from http://stackoverflow.com/questions/13405129 */
+function download(text, name, type) {
+    var a = document.createElement("a");
+    var file = new Blob([text], {type: type});
+    a.href = URL.createObjectURL(file);
+    a.download = name;
+    a.click();
+}
+var x;
 $(function() {
+    document.x= new SimpleFileReader($('#filebox'),'fileload');
 
     //** Define View handlers **/
     $('.absolute_form .startfield').datepicker( {
