@@ -32,13 +32,14 @@ class TimelineRelations {
         if ((tend != "undefined") && (tend != "Date") && !(ended instanceof Date)) {
             ended  = ended.toDate();
         }
-        if ((tstart != "undefined") && (tstart != "Date") && !( when instanceof Date)) {
-            when  = when.toDate();
-        }
-
 
         if (when instanceof MemoryMoment) {
             edit = false;
+        }
+
+
+        if ((tstart != "undefined") && (tstart != "Date") && !( when instanceof Date)) {
+            when  = when.toDate();
         }
 
         return { start:when,end:ended, editable:edit};
@@ -113,6 +114,9 @@ class TimelineRelations {
                   $('.absolute_form .textfield').prop('value',item.content);
                   $('.absolute_form .startfield').prop('value',item.start);
                   $('.absolute_form .endfield').prop('value',item.end);
+                  $('.absolute_form .startfield').attr('disabled', ! that.events[loc].editable);
+                  $('.absolute_form .endfield').attr('disabled', ! that.events[loc].editable);
+
 
                 },
                 onAdd: function (item, callback) {
