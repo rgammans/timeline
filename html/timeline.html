@@ -6,6 +6,9 @@
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.css">
       <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.js"></script>
       <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+
+    <!-- Our JS from bowe -->
+      <script type='text/javascript' src="../lib/jquery.js"></script>
       <script type='text/javascript' src="../lib/rel_moment.js"></script>
       <script type='text/javascript' src="../lib/app.js"></script>
       <script type='text/javascript' src="../lib/browser-polyfill.js"></script>
@@ -13,9 +16,6 @@
   </style>
 </head>
 <body>
-  <h2>Example Timeline</h2>
-<span id="warn">Please note you will need internet access for this to work. Either you don't have it or an error occured</span>
-<p>
 <script type='text/javascript'>
 window.onload=function(){
     var container = document.getElementById('vis');
@@ -36,7 +36,24 @@ today              =    app.create_event("England declares WAR!",               
 }
 </script>
 
-<div id="vis"></div>
+<h2>Example Timeline</h2>
+    <span id="warn">Please note you will need internet access for this to work. Either you don't have it or an error occured</span>
+   <p>
+
+    <div id="vis"></div>
+
+    <div id="edit-form">
+        <form>
+        <div class="absolute_form">
+            <div class="inner-wrapper">
+                <input class="input idfield" name="label" type="hidden">
+                <input class="input textfield" name="label" type="text">
+                <input class="input startfield" name="label" type="text">
+                <input class="input endfield" name="label" type="text">
+                <button onclick="app.update_entry()" type="button">Update</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 

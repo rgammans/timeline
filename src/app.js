@@ -43,7 +43,8 @@ class TimelineRelations {
         if (moment.isMoment(new_value)) {
             start.set(new_value.toObject());
         } else {
-            start.set(moment(new_value).toObject());
+            var new_start = moment(new_value);
+            start.set(new_start.toObject());
         }
     }
 
@@ -71,10 +72,27 @@ class TimelineRelations {
 
     }
 
-    run(container) {
+    update_entry() {
+
+        if (this.timeline) {
+                var loc =  $('.absolute_form .idfield').prop('value');
+                var entry = this.events[loc]
+                entry.content = $('.absolute_form .textfield').prop('value');
+                if (entry.editable) {
+                    //TODO - Replace Date with a better string parser
+                    var start_date = new Date( $('.absolute_form .startfield').prop('value'));
+                    this._update_start(this.date_relations[loc].start ,  start_date);
+                //  $('.absolute_form .endfield').prop('value');
+                }
+                this.updateTimeline();
+        }
+    }
+
+
+    run(time_container, form_container) {
         var that = this;
         this.dataset = new vis.DataSet(this.events);
-        this.timeline=new vis.Timeline(container,this.dataset,{
+        this.timeline=new vis.Timeline(time_container,this.dataset,{
                 snap: null,
                 editable: {
                     add: true,         // add new items by double tapping
@@ -82,7 +100,15 @@ class TimelineRelations {
                     remove: true       // delete an item by tapping the delete button top right
                },
 
-                onMoving: function (item,callback) { that.onMove(item,callback);}
+                onMoving: function (item,callback) { that.onMove(item,callback);},
+                onUpdate: function (item, callback) { 
+                  var loc = item.id;
+                  $('.absolute_form .idfield').prop('value',item.id);
+                  $('.absolute_form .textfield').prop('value',item.content);
+                  $('.absolute_form .startfield').prop('value',item.start);
+                  $('.absolute_form .endfield').prop('value',item.end);
+
+                },
             });
         }
 }
