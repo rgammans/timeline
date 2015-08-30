@@ -27,15 +27,21 @@ class TimelineRelations {
 
         //Convert to JS Dates for vis.
         var tend = typeof(ended);
+        var tstart = typeof(when);
         var edit = true;
-        if ((tend != "undefined") && (tend != "Date")) {
+        if ((tend != "undefined") && (tend != "Date") && !(ended instanceof Date)) {
             ended  = ended.toDate();
         }
+        if ((tstart != "undefined") && (tstart != "Date") && !( when instanceof Date)) {
+            when  = when.toDate();
+        }
+
+
         if (when instanceof MemoryMoment) {
             edit = false;
         }
 
-        return { start:when.toDate(),end:ended, editable:edit};
+        return { start:when,end:ended, editable:edit};
     }
 
     //This handle the face we get different Date types back from Vis.
@@ -109,6 +115,12 @@ class TimelineRelations {
                   $('.absolute_form .endfield').prop('value',item.end);
 
                 },
+                onAdd: function (item, callback) {
+                    that.create_event(item.content,moment(item.start));
+                    item.id = that.events.length -1;
+                    callback(item);
+                }
+
             });
         }
 }
