@@ -36,3 +36,10 @@ All the deliverables are in html and lib at the moment.
 
 A demo page of the built application is on my website at http://backslashat.org/timeline/html/timeline.html 
 
+TODO
+----
+
+Add lots of CSS to make the forms look pretty.
+Allow relative setting f the end, and referneces of the end value of
+other events.
+Fix save bug with relative events created the UI.
