@@ -25,7 +25,7 @@ class SimpleFileReader {
     onabort (evt) {
         $('.message-box',this.container).html('<div class="error abort"> The file load failed (abort)</div>')
     }
-    onabort (evt) {
+    onerror (evt) {
         $('.message-box',this.container).html('<div class="error "> The file load failed (error)</div>')
     }
     onload (evt) {
