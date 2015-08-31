@@ -179,7 +179,11 @@ class TimelineRelations {
             //Walk the events building up a JSON friend ly list of events.
             for(var i = 0; i < this.events.length; i++) {
                 var ev = this.events[i]
-                if (ev.editable) {
+                if (ev.deleted ) {
+                    //Let not keep our garbage about forever.
+                    rv_base.push({deleted:true});
+
+                } else if (ev.editable) {
                     //The degenreate case of an unlinked event.
                     rv_base.push(ev)
                 } else {
@@ -194,5 +198,122 @@ class TimelineRelations {
 
             }
             return JSON.stringify(rv_base);
+        }
+        unserialize(data) {
+            var objs = JSON.parse(data);
+            var new_events = []
+            var index_map= []
+            var fixups =[]
+
+
+            //Helper function to put back date references back in.
+            
+            function load_reldate(date,idx,edge) {
+                if (typeof(date) == "string") {
+                    return  moment(new Date(new_events[i].end));
+                } else {
+                    //Should be an object.
+                    var referent_idx = index_map.indexOf(date.index);
+                    if (referent_idx == -1) {
+                        //Not found case , this could be because the referent was deleted,
+                        //or because/ it hasn't been processed yet.
+                        // Place a temporarry value and we will sort it out in the fix up phase.
+                        var rv = MemoryMoment(new Date(date.value));
+                        for (var op of date.ops) { rv.append_op(op); }
+                        //Append to fixups list..
+                        fixups.push({ idx:idx, edge:edge, references:date_idx, reference_edge:date.dete_edge})
+                    } else {
+                        var edge = date.date_edge;
+                        var base_event = new_events[referent_idx];
+                        var rv = new MemoryMoment(base_event[edge]);
+                        for (var op of date.ops) { rv.append_op(op); }
+                    }
+                    return rv;
+                }
+            }
+
+            //Walk the list in the saved file.
+            for (var o of objs) {
+                if (o.editable) {
+                    //This must be a simple object
+                    var i = new_events.length ;
+                    //Maintain a lookup of where our objects are.
+                    index_map.push(o.id);
+                    //Update id, and place it in our store.
+                    o.id = i ;
+                    new_events.push(o);
+                    //Unfortanely JSON.stringify breaks dtae objs, soe we need to fix them up
+                    // use JS Date to parse strings becuase moment is fussy.
+                    if (o.start) {
+                        new_events[i].start = moment(new Date(new_events[i].start))
+                    }
+                    if (o.end) {
+                        new_events[i].end = moment(new Date(new_events[i].end))
+                    }
+
+                } else if (o.deleted) {
+                    //Ignore deleted items.
+                    continue;
+                } else {
+                    //Lets work out what we need.
+                    var i = new_events.length ;
+                    var evt= {};
+                    evt.content = o.content;
+                    evt.editable =  o.editable;
+                    evt.id = i
+                    if (o.start) {
+                        evt.start = load_reldate(o.start,i,'start');
+                    }
+                    if (o.end) {
+                        evt.end = load_reldate(o.end,i,'end');
+                    }
+                    new_events.push(evt)
+                }
+            }
+
+            // Walk the list of fixups, which are either forward references or references
+            // to deleted objects.
+            var abs_mem_moments = new Array(new_events.length);
+            abs_mem_moments.fill({}); //Warning all positions have the same obj.
+            for (var fixup of fixups ) {
+                var referent_idx = index_map.indexOf(fixup.references);
+                if (referent_idx = -1 ) {
+                    //Not actually a relative, we might think we can just rewrit the value with 
+                    // to Moment , but if anything is raltive to this that breaks the link.
+                    abs_mem_monents[fixup.idx] = Object.assign({},abs_mem_monents[fixup.idx] );
+                    abs_mem_monents[fixup.idx][fixup.edge] = true;
+                } else {
+                    var referent = new_events[referent_idx][fixup.reference_edge];
+                    var obj_fix = new_events[fixup.idx]
+                    if ( referent.toDate() != obj_fix[fixup.edge].toDate() ) { throw "date mismatch"}
+                    else {   obj_fix[fixup.edge].base = referent; }
+                }
+            }
+            // See there any any edible flags we can fliip becuase of unresavable references,
+            // and copy into our main data structure.
+            this.events =[]
+            this.date_relations = []
+            for (var i=0; i<  abs_mem_moments.length; ++i) {
+                var am = abs_mem_moments[i];
+                var ev = new_events[i];
+                var start = ev.start;
+                var end = ev.end;
+
+                //Save the dates int the realtions arrays..
+                this.date_relations.push({start:start, end:end});
+
+                //Convert any non-relative dates.
+                if (am.start) { start = start.toDate() }
+                if (am.end ) { end = end.toDate() }
+
+                //Format objects,
+                var dates= this.dateProcessor(start,end);
+                ev.editable = ev.editable || dates.editable;
+                ev.start = dates.start;
+                ev.end = dates.end;
+                this.events.push(ev);
+            }
+            this.dataset.clear();
+            this.dataset.add(this.events);
         }
 }

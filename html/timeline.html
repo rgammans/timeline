@@ -66,7 +66,10 @@ function download(text, name, type) {
 }
 var x;
 $(function() {
-    document.x= new SimpleFileReader($('#filebox'),'fileload');
+    document.x= new SimpleFileReader($('#filebox'),'fileload',{
+        display_content:true,
+        onload: function(data) { app.unserialize(data); }
+    });
 
     //** Define View handlers **/
     $('.absolute_form .startfield').datepicker( {
@@ -140,6 +143,7 @@ $(function(){
 
 game_start =            app.create_event("Game Start",                          moment("2015-12-21"));
 s_happen =              app.create_event("Something Happend",                   new MemoryMoment(game_start).subtract(2,'months'));
+                        app.create_event("Guy Fawkes",                          moment("2015-11-05"));
 other =                 app.create_event("Another thing happens",               s_happen.add(1,'day')); 
 today              =    app.create_event("England declares WAR!",               moment());
 
