@@ -10,6 +10,10 @@ all: lib css
 css: $(CSS)
 lib: $(LIB)
 
+#
+# Bower and Node modules/ polyfills which need to copied into
+# our distribution.
+#
 lib/browser-polyfill.js: node_modules/babel-core/browser-polyfill.js
 	mkdir -p $(@D)
 	cp $< $@
@@ -38,10 +42,17 @@ css/ui/images/ui-icons_444444_256x240.png:  bower_components/jquery-ui/themes/$(
 	mkdir -p $(@D)
 	cp $< $@
 
+#
+# A Generic rule to build locally written J
+#
+
 lib/%.js: src/%.js
 	mkdir -p $(@D)
 	babel  $< -o $@
 
+#
+# Get and node / bower files which are references.
+#
 node_modules/babel-core/browser-polyfill.js:
 	npm install babel-core
 
