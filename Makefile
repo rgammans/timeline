@@ -48,7 +48,7 @@ css/ui/images/ui-icons_444444_256x240.png:  bower_components/jquery-ui/themes/$(
 
 lib/%.js: src/%.js
 	mkdir -p $(@D)
-	babel  $< -o $@
+	babel -s true  $< -o $@
 
 #
 # Get and node / bower files which are references.
