@@ -3,11 +3,12 @@
 
 class SimpleFileReader {
 
-    constructor(container,id) { 
+    constructor(container,id,opts) { 
         var that = this;
         this.container = container
-        $(container).html('<input type="file" id="' + id +'" name="file" > <div id="xx" style="background:grey;" class="content"> ');
-        var x=$("#"+id,container);
+        this.options = opts
+        $(container).html('<input type="file" id="' + id +'" name="file" > <div class="message-box" style="background:grey;" class="content"> ');
+        this.input=$("#"+id,container);
         $("#"+id,container).on('change',function() { that.onchanged.apply(that,arguments) } );
     }
     onchanged(e) {
@@ -22,13 +23,20 @@ class SimpleFileReader {
     }
 
     onabort (evt) {
-        $('#xx',this.container).html('<div class="error abort"> The file load failed (abort)</div>')
+        $('.message-box',this.container).html('<div class="error abort"> The file load failed (abort)</div>')
     }
     onabort (evt) {
-        $('#xx',this.container).html('<div class="error "> The file load failed (error)</div>')
+        $('.message-box',this.container).html('<div class="error "> The file load failed (error)</div>')
     }
     onload (evt) {
         var txt =  this.reader.result;
-        $('#xx',this.container).html('<div class="data">'+ this.reader.result +'</div>')
+        if ( this.options.display_content ) {
+            $('.message-box',this.container).html('<div class="data">'+ txt +'</div>')
+        }
+        if (this.options.onload ) {
+            this.options.onload(txt);
+            this.input.prop('value','');
+            $('.message-box',this.container).html('<div class="success">Loaded successfully</div>')
+        }
     }
 }
