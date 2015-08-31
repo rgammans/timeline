@@ -143,4 +143,56 @@ class TimelineRelations {
 
             });
         }
+
+        //Return a tring representation on the managed data.
+        serialize() {
+            var rv_base = []
+            var lookup_data= []
+            var reference_list = []
+
+            function add_date (date_obj,idx,dtype) {
+                //Adds a date object to the reference list
+                // if it is undefined we don't care.
+                if (date_obj) {
+                    reference_list.push(date_obj);
+                    lookup_data.push({event_idx:idx,date_edge:dtype})
+                }
+            }
+            function resolve_date(start) {
+                    var refdata= null;
+                    if (start instanceof MemoryMoment ){
+                        refdata = start.findBase(reference_list);
+                        var resolved = lookup_data[refdata.index];
+                        refdata.index = resolved.event_idx;
+                        refdata.date_edge = resolved.date_edge;
+                    } else {
+                        refdata = start;
+                    }
+                    return refdata;
+            }
+            //Walk date_relations building a list of date which can
+            // be used by find base.
+            for(var i = 0; i < this.events.length; i++) {
+                add_date(this.date_relations[i].start,i,'start');
+                add_date(this.date_relations[i].end,i,'end');
+            }
+            //Walk the events building up a JSON friend ly list of events.
+            for(var i = 0; i < this.events.length; i++) {
+                var ev = this.events[i]
+                if (ev.editable) {
+                    //The degenreate case of an unlinked event.
+                    rv_base.push(ev)
+                } else {
+                    //This event has links - start with the basic stuff.
+                    var json_ev = { content:ev.content, id: ev.id };
+                    var start = this.date_relations[i].start;
+                    var end = this.date_relations[i].end;
+                    json_ev.start = resolve_date(start);
+                    json_ev.end = resolve_date(end);
+                    rv_base.push(json_ev);
+                }
+
+            }
+            return JSON.stringify(rv_base);
+        }
 }
