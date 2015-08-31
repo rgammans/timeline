@@ -235,10 +235,10 @@ class TimelineRelations {
                         //Not found case , this could be because the referent was deleted,
                         //or because/ it hasn't been processed yet.
                         // Place a temporarry value and we will sort it out in the fix up phase.
-                        var rv = MemoryMoment(new Date(date.value));
+                        var rv = new MemoryMoment(new Date(date.value));
                         for (var op of date.ops) { rv.append_op(op); }
                         //Append to fixups list..
-                        fixups.push({ idx:idx, edge:edge, references:date_idx, reference_edge:date.dete_edge})
+                        fixups.push({ idx:idx, edge:edge, references:date.index, reference_edge:date.date_edge})
                     } else {
                         var edge = date.date_edge;
                         var base_event = new_events[referent_idx];
@@ -278,6 +278,7 @@ class TimelineRelations {
                     evt.content = o.content;
                     evt.editable =  o.editable;
                     evt.id = i
+                    index_map.push(i);
                     if (o.start) {
                         evt.start = load_reldate(o.start,i,'start');
                     }
@@ -297,8 +298,8 @@ class TimelineRelations {
                 if (referent_idx = -1 ) {
                     //Not actually a relative, we might think we can just rewrit the value with 
                     // to Moment , but if anything is raltive to this that breaks the link.
-                    abs_mem_monents[fixup.idx] = Object.assign({},abs_mem_monents[fixup.idx] );
-                    abs_mem_monents[fixup.idx][fixup.edge] = true;
+                    abs_mem_moments[fixup.idx] = Object.assign({},abs_mem_monents[fixup.idx] );
+                    abs_mem_moments[fixup.idx][fixup.edge] = true;
                 } else {
                     var referent = new_events[referent_idx][fixup.reference_edge];
                     var obj_fix = new_events[fixup.idx]
