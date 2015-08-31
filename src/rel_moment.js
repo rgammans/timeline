@@ -1,4 +1,3 @@
-//Note this is in ES6 Syntax - probaly need to do ES6 export stuff too
 
 class MemoryMoment {
       constructor(initVal) {
@@ -7,8 +6,14 @@ class MemoryMoment {
             this._ops = []
         }
 
-    _append_op(op) {
+    append_op(op) {
         this._ops.push(op);
+    }
+
+    set(value_desc) {
+
+        this.ops = [];
+        this.base = moment(value_desc);
     }
 
     /**
@@ -16,7 +21,7 @@ class MemoryMoment {
     *   value.
     */
     move_back(amt,units) {
-        this._append_op({'op':'subtract','amt':amt,'units':units});
+        this.append_op({'op':'subtract','amt':amt,'units':units});
     }
 
     /**
@@ -24,7 +29,7 @@ class MemoryMoment {
     *   value.
     */
     move_forward(amt,units) {
-        this._append_op({'op':'add','amt':amt,'units':units});
+        this.append_op({'op':'add','amt':amt,'units':units});
     }
     
     /**
@@ -34,7 +39,7 @@ class MemoryMoment {
     subtract(amt,units) {
         //Buid a new values based on tjis
         var rv = new MemoryMoment(this);
-        rv._append_op({'op':'subtract','amt':amt,'units':units});
+        rv.append_op({'op':'subtract','amt':amt,'units':units});
         return rv;
     }
  
@@ -45,7 +50,7 @@ class MemoryMoment {
     add(amt,units) {
         //Buid a new values based on tjis
         var rv = new MemoryMoment(this);
-        rv._append_op({'op':'add','amt':amt,'units':units});
+        rv.append_op({'op':'add','amt':amt,'units':units});
         return rv;
     }
 
@@ -111,3 +116,5 @@ class MemoryMoment {
 
 
 }
+
+MemoryMoment.ops = ['add','subtract']
