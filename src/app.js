@@ -174,9 +174,14 @@ class TimelineRelations {
                     var refdata= null;
                     if (start instanceof MemoryMoment ){
                         refdata = start.findBase(reference_list);
-                        var resolved = lookup_data[refdata.index];
-                        refdata.index = resolved.event_idx;
-                        refdata.date_edge = resolved.date_edge;
+                        if (refdata)  {
+                            var resolved = lookup_data[refdata.index];
+                            refdata.index = resolved.event_idx;
+                            refdata.date_edge = resolved.date_edge;
+                        } else {
+                            console.warn("Failled to maintain all references");
+                            refdata = start.toMoment();
+                        }
                     } else {
                         refdata = start;
                     }
@@ -222,7 +227,7 @@ class TimelineRelations {
             
             function load_reldate(date,idx,edge) {
                 if (typeof(date) == "string") {
-                    return  moment(new Date(new_events[i].end));
+                    return  moment(new Date(date));
                 } else {
                     //Should be an object.
                     var referent_idx = index_map.indexOf(date.index);
