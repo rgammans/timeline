@@ -20,9 +20,21 @@ class TimelineRelations {
         var dates = this.dateProcessor(when,ended);
        //Id is our array index which makes the call backs easy
         this.events[loc] = {id:loc, content:name,start:dates.start,end:dates.end, editable:dates.editable};
+
+        if (this.dataset) {
+            this.dataset.add(this.events[loc]);
+        }
+
         return when;
     }
 
+    create_event_relative(name, start_idx,start_edge, start_ops ) {
+
+        var start = new MemoryMoment(this.date_relations[start_idx][start_edge]);
+        for (var o of start_ops) { start.append_op(o); }
+        return this.create_event(name,start);
+
+    }
     dateProcessor(when,ended) {
 
         //Convert to JS Dates for vis.
@@ -133,7 +145,7 @@ class TimelineRelations {
                     // in the array can't be reused
                     that.events[loc].deleted = true;
                     if (form_methods.get_id() == loc) {
-                        form_methods.set_id('')
+                        form_methods.set_id(undefined)
                         form_methods.set_startDate('')
                         form_methods.set_endDate('')
                         form_methods.set_text('')

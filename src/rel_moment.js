@@ -117,4 +117,7 @@ class MemoryMoment {
 
 }
 
-MemoryMoment.ops = ['add','subtract']
+MemoryMoment.ops = ['add','subtract'];
+MemoryMoment.verbose_ops = ['after','before'];
+MemoryMoment.units = ['years','quarters','months','weeks','days',
+                      'hours','minutes','seconds','milliseconds'];
