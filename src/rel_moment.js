@@ -81,12 +81,11 @@ class MemoryMoment {
     _checkBase(val,opts) {
         //Helper function for find base.
         for (var i=0 ; i< opts.length; ++i ) {
-            var possible  = opts[i];
-            if (possible == val) {
-                return { value:possible, index:i};
+            if (opts[i] === val) {
+                return { value:opts[i], index:i};
             }
-            return null;
         }
+        return null;
     }
 
     /**
