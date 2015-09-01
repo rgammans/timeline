@@ -21,6 +21,18 @@
       <script type='text/javascript' src="../lib/simpleFile.js"></script>
       <script type='text/javascript' src="../lib/browser-polyfill.js"></script>
   <style type='text/css'>
+
+legend {
+    font-weight: bold;
+    font-size: 130%;
+}
+fieldset {
+    margin: 20px 0px 20px 0px;
+}
+label {
+    display: table-row;
+}
+
   </style>
 </head>
 <body>
@@ -36,8 +48,8 @@
     <div id="edit-form">
         <form>
         <div class="absolute_form">
-            <div class="inner-wrapper">
-                <h3> Edit the selected object </h3>
+            <fieldset>
+                <legend> Edit the selected object </legend>
                 <input class="input idfield" name="id" type="hidden">
                 <label for="label">Event label:</label>
                 <input class="input textfield" name="label" type="text">
@@ -47,11 +59,13 @@
                 <label for="label">End Date (leave blank if an instant):</label>
                 <input class="input endfield" name="end" type="text">
                 <input class="input endfield_alt" name="end_alt" type="hidden">
+                <p>
                 <button onclick="app.update_entry()" type="button">Update</button>
-            </div>
+            </fieldset>
         </div>
         <div class="relative_form" style="display:none;">
-            <h3>Create a dependent object</h3>   
+            <fieldset>
+            <legend>Create a dependent object</legend>   
                 <label for="label">Event label:</label>
                 <input class="input textfield" name="label" type="text">
                  This event will be based on "<span class="event_name"></span>" and starts
@@ -64,10 +78,12 @@
                     <button class="del_button" type="button" onclick="form_methods.remove_operation(this)">Remove this delta</button>
                     </div>
                     <input class="input op_length" type="hidden" value="0">
-                    <div class="list"></div>
+                    <fieldset class="list"></fieldset>
                    </div>
                 of that event.
+                <p>
                 <button type="button" onclick="form_methods.add_relative_event()" >Create Event</button>
+            </fieldset>
         </div>
             <br>
         <div class="instructions">
