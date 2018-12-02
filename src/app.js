@@ -101,8 +101,8 @@ export class TimelineRelations {
                 var entry = this.events[loc]
                 entry.content =this.form_methods.get_text();
                 if (entry.editable) {
-                    //TODO - Replace Date with a better string parser
-                    var start_date = new Date( this.form_methods.get_startDate());
+                    //TODO - Replace Date with a better string parser (Date.parse is much better)
+                    var start_date = new Date( Date.parse(this.form_methods.get_startDate()));
                     this._update_start(this.date_relations[loc].start ,  start_date);
                 //  $('.absolute_form .endfield').prop('value');
                 }
@@ -157,7 +157,7 @@ export class TimelineRelations {
             });
         }
 
-        //Return a tring representation on the managed data.
+        //Return a string representation on the managed data.
         serialize() {
             var rv_base = []
             var lookup_data= []
@@ -263,10 +263,10 @@ export class TimelineRelations {
                     //Unfortanely JSON.stringify breaks dtae objs, soe we need to fix them up
                     // use JS Date to parse strings becuase moment is fussy.
                     if (o.start) {
-                        new_events[i].start = moment(new Date(new_events[i].start))
+                        new_events[i].start = moment(new Date(Date.parse(new_events[i].start)))
                     }
                     if (o.end) {
-                        new_events[i].end = moment(new Date(new_events[i].end))
+                        new_events[i].end = moment(new Date(Date.parse(new_events[i].end)))
                     }
 
                 } else if (o.deleted) {
