@@ -1,0 +1,32 @@
+{
+  "name": "timeline_tool",
+  "version": "1.0.0",
+  "description": "A tool to help visualisation and display narrative timelines",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack;  copyfiles -f html/*.html dist/"
+  },
+  "keywords": [
+    "timeline"
+  ],
+  "author": "Roger Gammans",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "copyfiles": "^2.1.0",
+    "css-loader": "^1.0.1",
+    "file-loader": "^2.0.0",
+    "style-loader": "^0.23.1",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "jquery-ui": "^1.12.1"
+  }
+}

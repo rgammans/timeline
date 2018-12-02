@@ -1,7 +1,6 @@
-//Learn to use browerify or whaterve to do a proper jQuery import
-// $ - is assumed to be jQuery
+import $ from 'jquery';
 
-class SimpleFileReader {
+export class SimpleFileReader {
 
     constructor(container,id,opts) { 
         var that = this;
