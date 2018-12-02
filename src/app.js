@@ -299,7 +299,7 @@ export class TimelineRelations {
                 if (referent_idx = -1 ) {
                     //Not actually a relative, we might think we can just rewrit the value with 
                     // to Moment , but if anything is raltive to this that breaks the link.
-                    abs_mem_moments[fixup.idx] = Object.assign({},abs_mem_monents[fixup.idx] );
+                    abs_mem_moments[fixup.idx] = Object.assign({},abs_mem_moments[fixup.idx] );
                     abs_mem_moments[fixup.idx][fixup.edge] = true;
                 } else {
                     var referent = new_events[referent_idx][fixup.reference_edge];
