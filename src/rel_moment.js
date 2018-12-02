@@ -1,5 +1,5 @@
 
-class MemoryMoment {
+export class MemoryMoment {
       constructor(initVal) {
 
             this.base = initVal

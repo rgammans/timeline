@@ -1,5 +1,6 @@
+import { MemoryMoment } from './rel_moment';
 
-class TimelineRelations {
+export class TimelineRelations {
 
     constructor($) {
        this.$ = $
