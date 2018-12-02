@@ -278,8 +278,8 @@ export class TimelineRelations {
                     var evt= {};
                     evt.content = o.content;
                     evt.editable =  o.editable;
+                    index_map.push(o.id);
                     evt.id = i
-                    index_map.push(i);
                     if (o.start) {
                         evt.start = load_reldate(o.start,i,'start');
                     }
