@@ -138,11 +138,21 @@ function init() {
 
 /** Helper function from http://stackoverflow.com/questions/13405129 */
 function download(text, name, type) {
-    var a = document.createElement("a");
     var file = new Blob([text], {type: type});
-    a.href = URL.createObjectURL(file);
-    a.download = name;
-    a.click();
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, name);
+    else {
+        var a = document.createElement("a");
+        var url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  
+         }, 0); 
+    }
 }
 
 export function startup (){
