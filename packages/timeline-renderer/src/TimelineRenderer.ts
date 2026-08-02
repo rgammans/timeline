@@ -202,7 +202,10 @@ export class TimelineRenderer {
     this._eventRows.clear();
 
     const events = this._data.events;
-    this.assignRows(events);
+    const rowCount = this.assignRows(events);
+
+    // Update SVG height based on number of rows
+    this.updateHeight(rowCount);
 
     for (const event of events) {
       const row = this._eventRows.get(event.id) ?? 0;
@@ -210,26 +213,53 @@ export class TimelineRenderer {
     }
   }
 
-  /** Assign events to rows to avoid overlap */
-  private assignRows(events: TimelineEvent[]): void {
-    // Sort by start date
+  /** Update SVG height to fit all rows */
+  private updateHeight(rowCount: number): void {
+    const minRows = 1;
+    const rows = Math.max(minRows, rowCount);
+    const rowSpacing = this._options.eventHeight + 8;
+    const eventsHeight = rows * rowSpacing;
+    const totalHeight = this._options.padding * 2 + this._options.eventRowHeight + eventsHeight;
+
+    // Use max of calculated height and configured minimum
+    const height = Math.max(totalHeight, this._options.height);
+    this._svg.style.height = `${height}px`;
+    this._viewport.setSize(this._viewport.width, height);
+  }
+
+  /** Assign events to rows to avoid visual overlap. Returns row count. */
+  private assignRows(events: TimelineEvent[]): number {
+    // Sort by start pixel position
     const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime());
 
-    // Track end times for each row
+    // Track end pixel positions for each row (with buffer for labels)
     const rowEnds: number[] = [];
+    const minLabelWidth = 80; // Minimum width for point event + label
+    const eventGap = 10; // Gap between events in same row
 
     for (const event of sorted) {
-      const eventEnd = event.end?.getTime() ?? event.start.getTime() + 3600000; // 1 hour for points
+      const startX = this._viewport.dateToX(event.start);
+      let endX: number;
 
-      // Find first row where this event fits
+      if (event.end) {
+        // Range event - use actual end position
+        endX = this._viewport.dateToX(event.end);
+      } else {
+        // Point event - add space for label
+        endX = startX + minLabelWidth;
+      }
+
+      // Find first row where this event fits (no visual overlap)
       let row = 0;
-      while (row < rowEnds.length && rowEnds[row] > event.start.getTime()) {
+      while (row < rowEnds.length && rowEnds[row] + eventGap > startX) {
         row++;
       }
 
       this._eventRows.set(event.id, row);
-      rowEnds[row] = eventEnd;
+      rowEnds[row] = endX;
     }
+
+    return rowEnds.length;
   }
 
   /** Add a single event (called from data callback) */

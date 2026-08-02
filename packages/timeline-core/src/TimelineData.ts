@@ -224,6 +224,45 @@ export class TimelineData {
   }
 
   /**
+   * Update an event's end date (only for editable events with an end date).
+   */
+  updateEventEnd(id: number, newEnd: Date | Dayjs): void {
+    const event = this._events[id];
+    if (!event || event.deleted || !event.editable || !event.end) {
+      return;
+    }
+
+    const relation = this._dateRelations[id];
+    if (!relation.end) {
+      return;
+    }
+    // All dates are wrapped in MemoryMoment, so we can call set()
+    (relation.end as MemoryMoment).set(newEnd instanceof Date ? newEnd : newEnd.toDate());
+
+    this.refreshEvents();
+  }
+
+  /**
+   * Update both start and end dates (only for editable events).
+   * Useful for moving an event while preserving duration.
+   */
+  updateEventDates(id: number, newStart: Date | Dayjs, newEnd?: Date | Dayjs): void {
+    const event = this._events[id];
+    if (!event || event.deleted || !event.editable) {
+      return;
+    }
+
+    const relation = this._dateRelations[id];
+    (relation.start as MemoryMoment).set(newStart instanceof Date ? newStart : newStart.toDate());
+
+    if (newEnd && relation.end) {
+      (relation.end as MemoryMoment).set(newEnd instanceof Date ? newEnd : newEnd.toDate());
+    }
+
+    this.refreshEvents();
+  }
+
+  /**
    * Mark an event as deleted.
    * We set a flag rather than removing to preserve array indices for references.
    */

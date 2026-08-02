@@ -56,6 +56,7 @@ export type RendererEventType =
   | 'eventSelected'
   | 'eventDeselected'
   | 'eventMoved'
+  | 'eventResized'
   | 'eventClicked'
   | 'createRequested'
   | 'viewChanged';
@@ -64,11 +65,15 @@ export type RendererEventType =
 export interface RendererEventPayloads {
   eventSelected: TimelineEvent;
   eventDeselected: void;
-  eventMoved: { id: number; newStart: Date };
+  eventMoved: { id: number; newStart: Date; newEnd?: Date };
+  eventResized: { id: number; edge: 'start' | 'end'; newDate: Date };
   eventClicked: TimelineEvent;
   createRequested: Date;
   viewChanged: { start: Date; end: Date };
 }
+
+/** Type of drag operation */
+export type DragMode = 'move' | 'resize-start' | 'resize-end';
 
 /** Listener function type */
 export type RendererEventListener<T extends RendererEventType> = (
@@ -79,7 +84,9 @@ export type RendererEventListener<T extends RendererEventType> = (
 export interface DragState {
   eventId: number;
   startX: number;
-  originalDate: Date;
+  originalStart: Date;
+  originalEnd?: Date;
+  mode: DragMode;
   element: SVGGElement;
 }
 

@@ -71,7 +71,8 @@ export class EventRenderer {
       group.removeChild(group.firstChild);
     }
 
-    const y = this._options.padding + this._options.eventRowHeight + row * (this._options.eventHeight + 4);
+    const rowSpacing = this._options.eventHeight + 8;
+    const y = this._options.padding + this._options.eventRowHeight + row * rowSpacing;
     const x = this._viewport.dateToX(event.start);
 
     if (!event.editable) {

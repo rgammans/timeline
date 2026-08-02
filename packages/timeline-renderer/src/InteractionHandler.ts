@@ -1,7 +1,9 @@
 import type { TimelineEvent } from '@timeline/core';
-import type { DragState, RendererEventType, RendererEventPayloads, RendererEventListener } from './types';
+import type { DragState, DragMode, RendererEventType, RendererEventPayloads, RendererEventListener } from './types';
 import type { ViewportManager } from './ViewportManager';
 import type { EventRenderer } from './EventRenderer';
+
+const EDGE_THRESHOLD = 8; // Pixels from edge to trigger resize mode
 
 /**
  * Handles mouse/touch interactions on the timeline.
@@ -121,16 +123,21 @@ export class InteractionHandler {
     if (eventId !== null) {
       const event = this._getEvent(eventId);
       if (event && event.editable) {
-        // Start drag
         const element = this._eventRenderer.getElement(eventId);
         if (element) {
+          // Determine drag mode based on click position
+          const mode = this.getDragMode(element, pos.x, event);
+
           this._dragState = {
             eventId,
             startX: pos.x,
-            originalDate: event.start,
+            originalStart: event.start,
+            originalEnd: event.end,
+            mode,
             element
           };
           element.classList.add('dragging');
+          element.classList.add(`drag-${mode}`);
         }
       }
     } else {
@@ -141,17 +148,64 @@ export class InteractionHandler {
     }
   }
 
+  /** Determine drag mode based on where the user clicked */
+  private getDragMode(element: SVGGElement, clickX: number, event: TimelineEvent): DragMode {
+    // Point events can only be moved
+    if (!event.end) {
+      return 'move';
+    }
+
+    const rect = element.querySelector('rect');
+    if (!rect) {
+      return 'move';
+    }
+
+    const rectX = parseFloat(rect.getAttribute('x') || '0');
+    const rectWidth = parseFloat(rect.getAttribute('width') || '0');
+    const leftEdge = rectX;
+    const rightEdge = rectX + rectWidth;
+
+    if (clickX <= leftEdge + EDGE_THRESHOLD) {
+      return 'resize-start';
+    } else if (clickX >= rightEdge - EDGE_THRESHOLD) {
+      return 'resize-end';
+    }
+    return 'move';
+  }
+
   private onMouseMove(e: MouseEvent): void {
     const pos = this.getMousePos(e);
 
     if (this._dragState) {
-      // Dragging an event
       const deltaX = pos.x - this._dragState.startX;
       const deltaMs = this._viewport.pixelsToDuration(deltaX);
-      const newStart = new Date(this._dragState.originalDate.getTime() + deltaMs);
 
-      // Update element position visually
-      this.updateDragPosition(this._dragState.element, newStart);
+      switch (this._dragState.mode) {
+        case 'move': {
+          const newStart = new Date(this._dragState.originalStart.getTime() + deltaMs);
+          const newEnd = this._dragState.originalEnd
+            ? new Date(this._dragState.originalEnd.getTime() + deltaMs)
+            : undefined;
+          this.updateDragPosition(this._dragState.element, newStart, newEnd, 'move');
+          break;
+        }
+        case 'resize-start': {
+          const newStart = new Date(this._dragState.originalStart.getTime() + deltaMs);
+          // Don't allow start to go past end
+          if (this._dragState.originalEnd && newStart < this._dragState.originalEnd) {
+            this.updateDragPosition(this._dragState.element, newStart, this._dragState.originalEnd, 'resize-start');
+          }
+          break;
+        }
+        case 'resize-end': {
+          const newEnd = new Date(this._dragState.originalEnd!.getTime() + deltaMs);
+          // Don't allow end to go before start
+          if (newEnd > this._dragState.originalStart) {
+            this.updateDragPosition(this._dragState.element, this._dragState.originalStart, newEnd, 'resize-end');
+          }
+          break;
+        }
+      }
     } else if (this._panState) {
       // Panning viewport
       const deltaX = pos.x - this._panState.startX;
@@ -163,6 +217,43 @@ export class InteractionHandler {
           end: this._viewport.end
         });
       }
+    } else {
+      // Update cursor based on hover position
+      this.updateCursor(e, pos);
+    }
+  }
+
+  /** Update cursor when hovering over events */
+  private updateCursor(e: MouseEvent, pos: { x: number; y: number }): void {
+    const eventId = this._eventRenderer.getEventIdFromElement(e.target as Element);
+    if (eventId === null) {
+      this._svg.style.cursor = '';
+      return;
+    }
+
+    const event = this._getEvent(eventId);
+    if (!event || !event.editable) {
+      this._svg.style.cursor = 'default';
+      return;
+    }
+
+    if (!event.end) {
+      this._svg.style.cursor = 'grab';
+      return;
+    }
+
+    const element = this._eventRenderer.getElement(eventId);
+    if (!element) return;
+
+    const mode = this.getDragMode(element, pos.x, event);
+    switch (mode) {
+      case 'resize-start':
+      case 'resize-end':
+        this._svg.style.cursor = 'ew-resize';
+        break;
+      case 'move':
+        this._svg.style.cursor = 'grab';
+        break;
     }
   }
 
@@ -176,20 +267,53 @@ export class InteractionHandler {
 
     if (this._dragState) {
       this._dragState.element.classList.remove('dragging');
+      this._dragState.element.classList.remove(`drag-${this._dragState.mode}`);
+      this._svg.style.cursor = '';
 
       if (isClick) {
         // It was a click, not a drag - select the event
         this.selectEvent(this._dragState.eventId);
       } else {
-        // It was a drag - emit move event
+        // It was a drag - emit appropriate event
         const deltaX = pos.x - this._dragState.startX;
         const deltaMs = this._viewport.pixelsToDuration(deltaX);
-        const newStart = new Date(this._dragState.originalDate.getTime() + deltaMs);
 
-        this.emit('eventMoved', {
-          id: this._dragState.eventId,
-          newStart
-        });
+        switch (this._dragState.mode) {
+          case 'move': {
+            const newStart = new Date(this._dragState.originalStart.getTime() + deltaMs);
+            const newEnd = this._dragState.originalEnd
+              ? new Date(this._dragState.originalEnd.getTime() + deltaMs)
+              : undefined;
+            this.emit('eventMoved', {
+              id: this._dragState.eventId,
+              newStart,
+              newEnd
+            });
+            break;
+          }
+          case 'resize-start': {
+            const newStart = new Date(this._dragState.originalStart.getTime() + deltaMs);
+            if (!this._dragState.originalEnd || newStart < this._dragState.originalEnd) {
+              this.emit('eventResized', {
+                id: this._dragState.eventId,
+                edge: 'start',
+                newDate: newStart
+              });
+            }
+            break;
+          }
+          case 'resize-end': {
+            const newEnd = new Date(this._dragState.originalEnd!.getTime() + deltaMs);
+            if (newEnd > this._dragState.originalStart) {
+              this.emit('eventResized', {
+                id: this._dragState.eventId,
+                edge: 'end',
+                newDate: newEnd
+              });
+            }
+            break;
+          }
+        }
       }
 
       this._dragState = null;
@@ -244,22 +368,32 @@ export class InteractionHandler {
     }
   }
 
-  private updateDragPosition(element: SVGGElement, newStart: Date): void {
-    const x = this._viewport.dateToX(newStart);
+  private updateDragPosition(
+    element: SVGGElement,
+    newStart: Date,
+    newEnd: Date | undefined,
+    mode: DragMode
+  ): void {
+    const startX = this._viewport.dateToX(newStart);
     const rect = element.querySelector('rect');
     const circle = element.querySelector('circle');
     const text = element.querySelector('text');
 
-    if (rect) {
-      rect.setAttribute('x', String(x));
+    if (rect && newEnd) {
+      const endX = this._viewport.dateToX(newEnd);
+      const width = Math.max(endX - startX, 10);
+
+      rect.setAttribute('x', String(startX));
+      rect.setAttribute('width', String(width));
+
       if (text) {
-        text.setAttribute('x', String(x + 6));
+        text.setAttribute('x', String(startX + 6));
       }
     } else if (circle) {
-      circle.setAttribute('cx', String(x));
+      circle.setAttribute('cx', String(startX));
       if (text) {
         const radius = parseFloat(circle.getAttribute('r') || '6');
-        text.setAttribute('x', String(x + radius + 4));
+        text.setAttribute('x', String(startX + radius + 4));
       }
     }
   }

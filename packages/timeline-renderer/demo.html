@@ -109,6 +109,7 @@
 
     #log .entry.event-selected { color: #4ec9b0; }
     #log .entry.event-moved { color: #dcdcaa; }
+    #log .entry.event-resized { color: #c586c0; }
     #log .entry.event-deselected { color: #808080; }
     #log .entry.create-requested { color: #ce9178; }
     #log .entry.view-changed { color: #569cd6; }
@@ -117,7 +118,7 @@
 <body>
   <h1>Timeline Renderer Demo</h1>
   <p class="description">
-    Interactive SVG timeline. Drag events to move them. Scroll to zoom. Double-click empty space to request creation.
+    Interactive SVG timeline. Drag middle to move events. Drag edges to resize. Scroll to zoom. Double-click empty space to create.
   </p>
 
   <div id="timeline-container"></div>
@@ -192,9 +193,23 @@
       clearEventInfo();
     });
 
-    renderer.on('eventMoved', ({ id, newStart }) => {
-      log('event-moved', `Moved event ${id} to ${newStart.toLocaleDateString()}`);
-      data.updateEventStart(id, newStart);
+    renderer.on('eventMoved', ({ id, newStart, newEnd }) => {
+      if (newEnd) {
+        log('event-moved', `Moved event ${id} to ${newStart.toLocaleDateString()} - ${newEnd.toLocaleDateString()}`);
+        data.updateEventDates(id, newStart, newEnd);
+      } else {
+        log('event-moved', `Moved event ${id} to ${newStart.toLocaleDateString()}`);
+        data.updateEventStart(id, newStart);
+      }
+    });
+
+    renderer.on('eventResized', ({ id, edge, newDate }) => {
+      log('event-resized', `Resized event ${id} ${edge} to ${newDate.toLocaleDateString()}`);
+      if (edge === 'start') {
+        data.updateEventStart(id, newDate);
+      } else {
+        data.updateEventEnd(id, newDate);
+      }
     });
 
     renderer.on('createRequested', (date) => {

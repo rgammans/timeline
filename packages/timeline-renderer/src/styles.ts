@@ -34,8 +34,16 @@ export const DEFAULT_STYLES = `
 }
 
 .timeline-renderer .event.dragging {
-  cursor: grabbing;
   opacity: 0.7;
+}
+
+.timeline-renderer .event.drag-move {
+  cursor: grabbing;
+}
+
+.timeline-renderer .event.drag-resize-start,
+.timeline-renderer .event.drag-resize-end {
+  cursor: ew-resize;
 }
 
 .timeline-renderer .event.non-editable {
