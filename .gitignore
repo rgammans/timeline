@@ -1,5 +1,22 @@
-lib/*
-dist/*
-node_modules/*
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+lib/
+
+# Editor
 *~
 .*.swp
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/

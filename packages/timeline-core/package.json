@@ -1,0 +1,42 @@
+{
+  "name": "@timeline/core",
+  "version": "0.1.0",
+  "description": "Core data model for timeline visualization with relative date relationships",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "keywords": [
+    "timeline",
+    "dates",
+    "relative-dates",
+    "visualization"
+  ],
+  "author": "Roger Gammans",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^8.2.0",
+    "vite-plugin-dts": "^5.0.3",
+    "vitest": "^4.1.10"
+  }
+}
