@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline Renderer Demo</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "dayjs": "https://esm.sh/dayjs@1.11.10",
+      "@timeline/core": "../timeline-core/dist/index.js",
+      "@timeline/renderer": "./dist/index.js"
+    }
+  }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    #timeline-container {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #f0f0f0;
+    }
+
+    #event-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      min-height: 80px;
+    }
+
+    #event-info h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    #event-info.empty {
+      color: #999;
+      font-style: italic;
+    }
+
+    .event-detail {
+      margin: 5px 0;
+    }
+
+    .event-detail label {
+      font-weight: 600;
+      display: inline-block;
+      width: 80px;
+    }
+
+    #log {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #log .entry {
+      margin: 2px 0;
+    }
+
+    #log .entry.event-selected { color: #4ec9b0; }
+    #log .entry.event-moved { color: #dcdcaa; }
+    #log .entry.event-deselected { color: #808080; }
+    #log .entry.create-requested { color: #ce9178; }
+    #log .entry.view-changed { color: #569cd6; }
+  </style>
+</head>
+<body>
+  <h1>Timeline Renderer Demo</h1>
+  <p class="description">
+    Interactive SVG timeline. Drag events to move them. Scroll to zoom. Double-click empty space to request creation.
+  </p>
+
+  <div id="timeline-container"></div>
+
+  <div class="controls">
+    <button id="btn-fit">Fit to Data</button>
+    <button id="btn-today">Go to Today</button>
+    <button id="btn-add">Add Random Event</button>
+    <button id="btn-clear-log">Clear Log</button>
+  </div>
+
+  <div id="event-info" class="empty">
+    Click an event to see details
+  </div>
+
+  <div id="log">
+    <div class="entry">Event log:</div>
+  </div>
+
+  <script type="module">
+    import { TimelineData } from '@timeline/core';
+    import { TimelineRenderer } from '@timeline/renderer';
+
+    // Create data with sample events
+    const data = new TimelineData({
+      onEventAdded: (e) => log('event-added', `Event added: ${e.content}`),
+      onEventUpdated: (e) => log('event-updated', `Event updated: ${e.content}`),
+      onEventRemoved: (id) => log('event-removed', `Event removed: ${id}`),
+      onTimelineUpdated: () => renderer?.refresh()
+    });
+
+    // Add sample events
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(lastWeek.getDate() - 7);
+
+    // Editable events (created with Date objects)
+    data.createEvent('Project Kickoff', lastWeek);
+    data.createEvent('Sprint Planning', yesterday, tomorrow);
+    data.createEvent('Feature Release', nextWeek);
+
+    // Non-editable relative event
+    data.createEventRelative('Post-release Review', 2, 'start', [
+      { op: 'add', amt: 3, units: 'days' }
+    ]);
+
+    // Create renderer
+    const container = document.getElementById('timeline-container');
+    const renderer = new TimelineRenderer(container, data, {
+      height: 250,
+      colors: {
+        event: '#4a90d9',
+        eventSelected: '#2563eb',
+        eventNonEditable: '#94a3b8'
+      }
+    });
+
+    // Event handlers
+    renderer.on('eventSelected', (event) => {
+      log('event-selected', `Selected: ${event.content}`);
+      showEventInfo(event);
+    });
+
+    renderer.on('eventDeselected', () => {
+      log('event-deselected', 'Deselected');
+      clearEventInfo();
+    });
+
+    renderer.on('eventMoved', ({ id, newStart }) => {
+      log('event-moved', `Moved event ${id} to ${newStart.toLocaleDateString()}`);
+      data.updateEventStart(id, newStart);
+    });
+
+    renderer.on('createRequested', (date) => {
+      log('create-requested', `Create requested at ${date.toLocaleDateString()}`);
+      // In a real app, you'd show a form here
+      const name = prompt('Event name:');
+      if (name) {
+        data.createEvent(name, date);
+        renderer.refresh();
+      }
+    });
+
+    renderer.on('viewChanged', ({ start, end }) => {
+      log('view-changed', `View: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+    });
+
+    // Control buttons
+    document.getElementById('btn-fit').addEventListener('click', () => {
+      renderer.fitToData();
+      renderer.render();
+    });
+
+    document.getElementById('btn-today').addEventListener('click', () => {
+      renderer.zoomTo(new Date(), 50);
+    });
+
+    document.getElementById('btn-add').addEventListener('click', () => {
+      const offset = Math.floor(Math.random() * 14) - 7;
+      const date = new Date();
+      date.setDate(date.getDate() + offset);
+      data.createEvent(`Event ${data.length + 1}`, date);
+      renderer.refresh();
+    });
+
+    document.getElementById('btn-clear-log').addEventListener('click', () => {
+      const logEl = document.getElementById('log');
+      logEl.innerHTML = '<div class="entry">Event log:</div>';
+    });
+
+    // Helper functions
+    function log(type, message) {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function showEventInfo(event) {
+      const el = document.getElementById('event-info');
+      el.className = '';
+      el.innerHTML = `
+        <h3>${event.content}</h3>
+        <div class="event-detail">
+          <label>ID:</label> ${event.id}
+        </div>
+        <div class="event-detail">
+          <label>Start:</label> ${event.start.toLocaleString()}
+        </div>
+        ${event.end ? `
+        <div class="event-detail">
+          <label>End:</label> ${event.end.toLocaleString()}
+        </div>
+        ` : ''}
+        <div class="event-detail">
+          <label>Editable:</label> ${event.editable ? 'Yes' : 'No (relative date)'}
+        </div>
+      `;
+    }
+
+    function clearEventInfo() {
+      const el = document.getElementById('event-info');
+      el.className = 'empty';
+      el.textContent = 'Click an event to see details';
+    }
+
+    // Expose for debugging
+    window.renderer = renderer;
+    window.data = data;
+  </script>
+</body>
+</html>
