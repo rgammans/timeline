@@ -1,6 +1,6 @@
 {
   "name": "timeline",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Timeline visualization tool with relative date relationships",
   "author": "Roger Gammans",

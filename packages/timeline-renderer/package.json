@@ -1,6 +1,6 @@
 {
   "name": "@timeline/renderer",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "SVG-based timeline renderer for @timeline/core",
   "type": "module",
   "main": "./dist/index.cjs",
