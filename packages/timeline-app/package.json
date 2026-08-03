@@ -1,0 +1,21 @@
+{
+  "name": "@timeline/app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Timeline application with event management",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@timeline/core": "*",
+    "@timeline/renderer": "*",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^8.2.0"
+  }
+}

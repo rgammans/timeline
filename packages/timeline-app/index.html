@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="toolbar">
+      <h1>Timeline</h1>
+      <div class="toolbar-actions">
+        <button id="btn-fit" title="Fit to data">Fit</button>
+        <button id="btn-today" title="Go to today">Today</button>
+        <span class="separator"></span>
+        <button id="btn-new" title="Create new event">+ New Event</button>
+        <span class="separator"></span>
+        <button id="btn-import" title="Import from file">Import</button>
+        <button id="btn-export" title="Export to file">Export</button>
+        <input type="file" id="file-import" accept=".json" hidden>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="timeline-panel">
+        <div id="timeline-container"></div>
+      </div>
+
+      <aside class="form-panel" id="form-panel">
+        <div class="form-placeholder" id="form-placeholder">
+          <p>Select an event to edit, or double-click the timeline to create a new event.</p>
+        </div>
+
+        <form id="event-form" class="event-form" hidden>
+          <div class="form-header">
+            <h2 id="form-title">Edit Event</h2>
+            <button type="button" id="btn-close-form" class="btn-icon" title="Close">&times;</button>
+          </div>
+
+          <div class="form-body">
+            <div class="form-group">
+              <label for="event-name">Name</label>
+              <input type="text" id="event-name" required>
+            </div>
+
+            <div class="form-group">
+              <label>Date Type</label>
+              <div class="radio-group">
+                <label>
+                  <input type="radio" name="date-type" value="absolute" checked>
+                  Absolute
+                </label>
+                <label>
+                  <input type="radio" name="date-type" value="relative">
+                  Relative to another event
+                </label>
+              </div>
+            </div>
+
+            <!-- Absolute date fields -->
+            <div id="absolute-fields">
+              <div class="form-group">
+                <label for="event-start">Start</label>
+                <input type="datetime-local" id="event-start" required>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="event-has-end">
+                  Has end date
+                </label>
+              </div>
+
+              <div class="form-group" id="end-date-group" hidden>
+                <label for="event-end">End</label>
+                <input type="datetime-local" id="event-end">
+              </div>
+            </div>
+
+            <!-- Relative date fields -->
+            <div id="relative-fields" hidden>
+              <div class="form-group">
+                <label for="ref-event">Reference Event</label>
+                <select id="ref-event">
+                  <option value="">Select an event...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="ref-edge">Reference Edge</label>
+                <select id="ref-edge">
+                  <option value="start">Start</option>
+                  <option value="end">End</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="offset-amount">Offset</label>
+                  <input type="number" id="offset-amount" value="0" min="0">
+                </div>
+
+                <div class="form-group">
+                  <label for="offset-units">Units</label>
+                  <select id="offset-units">
+                    <option value="days">Days</option>
+                    <option value="weeks">Weeks</option>
+                    <option value="months">Months</option>
+                    <option value="hours">Hours</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="offset-direction">Direction</label>
+                  <select id="offset-direction">
+                    <option value="add">After</option>
+                    <option value="subtract">Before</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <button type="button" id="btn-delete" class="btn-danger" hidden>Delete</button>
+            <div class="form-footer-right">
+              <button type="button" id="btn-cancel">Cancel</button>
+              <button type="submit" class="btn-primary">Save</button>
+            </div>
+          </div>
+        </form>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
